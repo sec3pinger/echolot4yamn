@@ -167,34 +167,34 @@ the next valid remailer-conf reply by the remailer.
 
 =item B<getkeyconf> [I<address> [I<address> ...]]
 
-Send a command to immediatly request keys and configuration from remailers.
+Send a command to immediately request keys and configuration from remailers.
 If no addresses are given requests will be sent to all remailers.
 
 =item B<sendpings> [I<address> [I<address> ...]]
 
-Send a command to immediatly send pings to the given remailers.
+Send a command to immediately send pings to the given remailers.
 If no addresses are given requests will be sent to all remailers.
 
 =item B<sendchainpings> I<address>B<:>I<address> [I<address>B<:>I<address> ...]
 
-Send a command to immediatly send chain pings to the given chains.
+Send a command to immediately send chain pings to the given chains.
 A chain is two remailer addresses seperated by a colon.
 
 =item B<buildstats>
 
-Send a command to immediatly rebuild stats.
+Send a command to immediately rebuild stats.
 
 =item B<buildkeys>
 
-Send a command to immediatly rebuild the keyrings.
+Send a command to immediately rebuild the keyrings.
 
 =item B<buildthesaurus>
 
-Send a command to immediatly rebuild the Thesaurus.
+Send a command to immediately rebuild the Thesaurus.
 
 =item B<buildfromlines>
 
-Send a command to immediatly rebuild the From Header lines page.
+Send a command to immediately rebuild the From Header lines page.
 
 =item B<summary>
 

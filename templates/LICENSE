@@ -1,4 +1,25 @@
-Echolot - a Pinger for anonymous remailers.
+
+The files in this directory are part of Echolot.
+
+In order to keep the templates short, the license statement is in this file.
+It applies to the files in this directory, namley:
+   * clist.html
+   * echolot.css
+   * echolot.html
+   * fromlinesindex.html
+   * mlist.html
+   * mlist2.html
+   * rlist-clear.html
+   * rlist-dsa.html
+   * rlist-rsa.html
+   * rlist.html
+   * rlist2-clear.html
+   * rlist2-dsa.html
+   * rlist2-rsa.html
+   * rlist2.html
+   * thesaurusindex.html
+   * v1legend.html
+   * v2legend.html
 
 Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2012, 2014 Peter Palfrader <peter@palfrader.org>
 

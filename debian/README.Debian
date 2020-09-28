@@ -1,0 +1,26 @@
+Echolot for Debian
+------------------
+
+Make sure mail to the Echolot pinger reaches /var/mail/echolot (or configure
+echolot to read it from any other location). Please really check that mail to
+the configured domain works. Any bounces will annoy dozends of remailer
+operators.
+
+To send commands to pingd it's best to use the /etc/init.d/echolot script.
+It takes care that pingd is only called as the correct user. See pingd(1) for a
+list of commands and their description.
+
+If you run this pinger please consider publishing the results so that other
+people benefit from it. Announcing the URL to the remailer operators' list
+<remops@lists.mixmin.net>, the alt.privacy.anon-server Usenet newsgroup
+and sending a mail to pingers@palfrader.org would be appreciated.
+
+Since many users installed Echolot without considering its implications the
+default setup is now to no longer start the pingd in the default installation.
+To actually enable it please modify /etc/default/echolot.
+
+If you want to run a pinger, please configure /etc/echolot/pingd.conf and
+/etc/default/echolot.  Then start echolot using /etc/init.d/echolot start
+and add some addresses to it: /etc/init.d/echolot add remailer@example.com.
+
+ -- Peter Palfrader <weasel@debian.org>, Sun, 14 Nov 2004 23:31:24 +0100

@@ -1,0 +1,427 @@
+Changes in version 2.1.9 - 2014-10-23
+	* Several debian updates.
+	* Update FSF address in all files.
+	* Fix the name of an option in an example in pingd.conf(5).
+	  closes: DebianBug#459938.
+	* Fix a bashishm in tools/create-distribution.
+	* Fix a markup typo in the pingd manpage.
+	* Fix "defined(@array) is deprecated" in Echolot/Tools.pm
+	* Newer GnuPG::Interface versions are more picky when it comes
+	  to command and command_args.  Previously, they would accept things
+	  in any order and would not care which of the two arrays had which.
+	  Now, command_args is really limited to have arguments for the
+	  command listed in command.  Any options go with, and in front of,
+	  the command.
+
+Changes in version 2.1.8 - 2005-04-25
+	* debian: Redirect init script output to /dev/null in logrotate
+
+Changes in version 2.1.7 - 2004-11-15
+	* debian: Add disable and enable to allowed commands in init
+	  script
+	* debian: Create echolot user group in proper gid space.
+	* debian: remove debconf stuff.
+	* handle empty environment better - previously we would whine
+	  when HOME or PATH were not set.
+
+Changes in version 2.1.6 - 2004-08-07
+	* Catch a possible use of undefined values in a log trace() call.
+
+Changes in version 2.1.5 - 2004-06-22
+	* Fix use of an illegal filedescriptor when we know of a remailer,
+	  but do not have keys for it yet/anymore.
+	* Check if syswrite's return value is defined
+	  (also is: do not write to gpg forever, once it has died or
+	  closed its stdin).
+	* Tell Mixmaster to create no dummies.  It has no remailer keys
+	  and reliability information anyway.
+	* Increase the number of remailers that need to list an address
+	  before it is added to 6.  It was 3 previously.
+	* Make set fetch=<value> work again.
+	* Make disable and enable actually work.
+
+Changes in version 2.1.4 - 2004-06-10
+	* Have new disable and enable commands which are shortcut
+	  for set pingit=off showit=off fetch=off and =on respectively.
+	* Accept show=, ping=, and fetchit= in addition to their real
+	  names in set.
+	* Do not accept expired or future mixmaster keys.
+	* Print summary on notice level, not info, if it was requested
+	  manually.
+	* Remove get_remailers since get_addresses in Echolot::Storage::File
+	  does almost the same.
+	* Make sure we do not create empty key hashes in metadata.
+	* gpg interaction cleanup, move a lot of duplicated code to
+	  Echolot::Tools.
+	* Filter out mixmaster outputs to stderr that are no problem.
+	* There's a TRACE loglevel now, which is even more noisy than DEBUG.
+	* Changed all pointers to savannah to alioth.
+	* Removed obsolete tools to convert echolot setups during 2.0beta*
+	  releases.
+	* Handle situations better in which a ping receives when the last
+	  key already is expired, and the remailer no longer exists in
+	  the remailers part of the metadata (only in the addresses part).
+	* Add a file that describes how Echolot works.
+
+Changes in version 2.1.3 - 2004-04-20
+	* Improvements to pingd.conf(5) by Colin.
+	* Use 'Apr' instead of 'Arp' for April.  closes: DebianBug#243504.
+
+Changes in version 2.1.2 - 2003-11-04
+	* Also ignore testing remailers in the thesaurus.
+	* Also ignore testing remailers in fromlines.
+
+Changes in version 2.1.1 - 2003-11-02
+	* Fix 0/false in Fetch/Ping/Show in summary report.
+	* fork() for calling mixmaster, so we can exec() it
+	  rather can using open("| ...") which ivokes a shell.
+	* Catch SIGPIPE and log it as error.
+	* Document thesaurusindexfile.
+	* Minor documentation fixes.
+	* When asked to shut down, exit immediatly after the current running
+	  task, even if we have a backlog.
+	* If we run late we should now drop actions where it does not hurt.
+	* Remove random command invocation via pingctr/init script.  People
+	  should just call pingd directly.  Also wait for pingd to really
+	  shut down in stop and restart.
+	* Regularily clean up the temp directory.
+	* Send out pings every two hours by default.
+	* Modified statistics generation:
+	  We no longer assume a normal distribution of latencies but instead
+	  use percentiles when calculating a life probability of an outstanding
+	  ping.  Also we do not show the mean of latency but the median as
+	  this seems to be 'more correct'.
+	  Also have different weights for pings based on their age.
+	* Optimized chain pinging: takes less CPU.
+	* Do not list remailers with the 'testing' capability in
+	  public stats.  Testing indicates a node is not ready for real
+	  users' traffic yet.
+	* Publish operator's address on index page.
+	* Refuse to run with euid == 0.
+
+Changes in version 2.1 - 2003-03-03
+	* Minor documentation fixes suggested by Ryan Lackey.
+	* Adjusted some loglevels (several info got downgraded to debug)
+	* Removed --pgp2 in CPunk RSA pings.
+	* Append random garbage to pings so they have different
+	  lengths.
+	  new options:
+	    - random_gabage (default: 8192)
+	      Garbage length is chosen uniformly from 0 to random_gabage
+	      bytes.
+	    - dev_urandom (default: /dev/urandom)
+	      where to read garbage from (more generally: non-blocking
+	      (low-quality) randomless source)
+	* Chain pinging:  Echolot now finds broken chains.
+	  new options:
+	     - do_chainpings (default: 1)
+	       Whether to do chain pinging.
+	     - show_chainpings (default: 1)
+	       Whether to show the result of our chain pinging in the
+	       public stats.
+	   Several other settings control the details of chain pinging.
+	   You probably don't want or need to tweak them. See
+	   the pingd.conf(5) manual page for details.
+	   - Also adds the new "sendchainpings" command.
+	* Create an index.txt file in the thesaurus directory which
+	  holds id, nick, and address for each remailer in the thesaurus.
+	  This helps additional tools to utilize Echolot's data.
+	* Compile a list of default From: lines as well as a list of
+	  remailers which allow user supplied From headers.
+	* Print status summary to log daily.
+	   - Also adds the new "summary" command.
+	* Reliable and CRLF - a neverending (sad) story.
+	* Handle situations better in which a ping is received when the
+	  key already has been expired.
+
+Changes in version 2.0.10 - 2003-02-03
+	* Return undef rather than 0 if we cannot open a Maildir.
+	* Add missing use of Carp to Echolot::Storage::File.pm.
+
+Changes in version 2.0.9 - 2003-01-14
+	* Logging is finally cleaned up. There are two new config options:
+	  logfile and loglevel.
+	* Automatically remove stale .pid files.
+	* Trash messages with errors immediately rather than storing them
+	  in mailerrordir forever.
+
+Changes in version 2.0.8 - 2003-01-13
+	* Work around a bug that let pingd die in certain random cases when
+	  dealing with unuseable PGP keys (like expired keys).
+	  Talk with Frank Tobin from GnuPG::Interface fame led to the diagnosis
+	  that pingd gets a SIGPIPE since the GnuPG process already exited.
+	* Removed a duplicate line from v2legend.
+	* Allow periods in hostname.
+	* Don't use GnuPG::Interface's recipients when encrypting any more as
+	  it is broken with at least GnuPG 1.2.1.
+	* Always use --no-secmem-warning with GnuPG calls.
+	* Also use supported remailers from type2 only remailers.
+	* Reset metadata if status is not defined.
+
+Changes in version 2.0.7 - 2002-12-18
+	* Added upgrade HOWTO.
+
+Changes in version 2.0.6 - 2002-12-18
+	* Have support for translated templates
+	* The templates now make use of CSS.
+	* Minor documentation fixes by Colin Tuckley
+	* thesaurusindexfile and indexfilebasename config values should no
+	  longer have the extension (.html) in them
+	* Fix v2 stats for cypherpunk remailers by using right column title.
+	* Use '(no subject)' instead of '' as a subject if none is
+	  otherwise chosen.
+
+Changes in version 2.0.5 - 2002-10-25
+	* Only take default parameters if they are not set in
+	  pingd.conf (as opposed to set to undef).
+	* Also support setups without user defined mailboxes
+	  (recipient_delimiter set to '').
+
+Changes in version 2.0.4 - 2002-10-16
+	* Fix pingd.conf(5) manpage a bit (indention levels).
+
+Changes in version 2.0.3 - 2002-10-12
+	* Set program name according to current action.
+	* Fix a typo that showed up in perl 5.0005_02 (had a , instead of a .
+	  in an open() when reading mboxen as input).
+
+Changes in version 2.0.2 - 2002-09-21
+	* Die immeditatly if there is no Version information in metadata.
+	* Make regular backups of metadata and rotate them properly.
+
+Changes in version 2.0.1 - 2002-09-21
+	* Store unkown fields from mix summary lines and put them in keyrings.
+
+Changes in version 2.0 - 2002-09-17
+	* New version number, this is 2.0, really!
+	* Minor spelling fixes.
+	
+Changes in version 2.0rc3 - 2002-09-12
+	* Write SENDMAIL to mix.cfg
+	* Add sendpings command.
+	* Only decrease a remailer's ttl during requesting -conf if
+	  it was requested by the usualy timer run and not by the
+	  user.
+	* Template cleanup: fix a link and add links to .txt versions
+	  to front page.
+	* Have install-perl-modules tool.
+	* Spelling fixes.
+	* seperate_rlists was renamed to separate_rlists.
+	* README was improved.
+
+Changes in version 2.0rc2 - 2002-09-08
+	* Reopen stdin to /dev/null instead of closing it to avoid
+	  perl 5.8 warnings.
+
+Changes in version 2.0rc1 - 2002-09-05
+	* new version number.
+	* Random spelling fixes.
+	* Do not show hidden remailers in thesaurus.
+
+Changes in version 2.0beta34 - 2002-09-04
+	* Make ping/request time more random.
+	* Encrypt pings (symmetrically), so that dup detection of some
+	  remailers (austria) fails and pings get processed.
+	* Write total number of unique remailers to echolot.html.
+
+Changes in version 2.0beta33 - 2002-08-23
+	* Scheduler fixes (inserted jobs for one time processing got requeued
+	  over and over again according to their interval).
+	* Give a short summary about current stats on index page.
+
+Changes in version 2.0beta32 - 2002-08-23
+	* Fix a major bug introduced in 2.0beta31 that resulted in no
+	  remailer-xxx queries beeing sent out.
+
+Changes in version 2.0beta31 - 2002-08-21
+	* Have a consistent name for the ~/echolot directory in README.
+	* If you request keyconf from only a few remailers, more requests could
+	  have been sent. Fixed that.
+	* Write REMAIL n to mix.cfg - apparently it defaults to yes, which
+	  means Mixmaster will want to create keys.
+	* Fix random typos.
+	* Fix pingctl script.
+
+Changes in version 2.0beta30 - 2002-08-15
+	* Write NAME and ADDRESS to mix.cfg - mix cannot figure it out
+	  if detached.
+
+Changes in version 2.0beta29 - 2002-08-14
+	* Create .meta files with the expiry date of pages.
+	* Also put the expiry date in HTML meta headers.
+	* Make indexfilebasename a configure option.
+	* Code cleanup: renamed some functions.
+
+Changes in version 2.0beta28 - 2002-08-13
+	* Write a standard mix.cfg configuration file for mixmaster.
+	  It only sets PUBRING and TYPE2LIST. Needed for systems where
+	  those values are overriden by systemwide defaults.
+
+Changes in version 2.0beta27 - 2002-08-13
+	* Some small fixes to the Debian Package
+
+Changes in version 2.0beta26 - 2002-08-12
+	* Fix a few typos in the echolot.html template.
+	* Added /etc/echolot/pingd.conf to the list of configfiles.
+	* Have a debian/ directory to build a Debian package.
+	* Config option mailindir was renamed to mailin. You now
+	  can also point it to a mbox format mailbox.
+	* Have --quiet.
+	* Stricter permissions for most newly created directories (go-rwx).
+
+Changes in version 2.0beta25 - 2002-08-10
+	* Produce echolot.html, an index file for echolot results.
+	
+Changes in version 2.0beta24 - 2002-08-10
+	* Remove »x« from end of pubring.mix summary lines.
+
+Changes in version 2.0beta23 - 2002-08-07
+	* Unlinking Thesaurus files works now.
+	* Detach correctly now.
+
+Changes in version 2.0beta22 - 2002-08-05
+	* Actually use the sane basedir. *sigh*
+
+Changes in version 2.0beta21 - 2002-08-05
+	* Using a sane basedir by default. You no longer need to specify
+	  it in pingd.conf.
+
+Changes in version 2.0beta20 - 2002-08-02
+	* Added pingctl wrapper to tools.
+	* echolot --help now gives a brief list of commands.
+	* Added acknowledgements.
+
+Changes in version 2.0beta19 - 2002-07-29
+	* Build keyrings in results.private too
+
+Changes in version 2.0beta18 - 2002-07-23
+	* Allow for inclusion of broken chain reports and same operator/machine
+	  lists in stats pages. Broken chain reports are not generated
+	  automatically; this is planned for a later release.  For now you need
+	  to supply this information in the files broken1.txt, broken2.txt, and
+	  sameop.txt.
+
+Changes in version 2.0beta17 - 2002-07-22
+	* You no longer need an extra Mixmaster installation for your pinger.
+	  Echolot can make use of any Mixmaster binary you alread have
+	  installed.
+	* The config hash »Pinger::Mix« is obsolete now. Please set
+	  »mixmaster« to the path of your mix executeable. Echolot now
+	  uses its own mix directory below echolothome by default (config
+	  option mixhome).
+	* The default gnupghome has changed from »gnupg« to »gnupghome«.
+	* New config option »gnupg«.
+	* Not the current time but the scheduled start time is used when
+	  deciding which remailers to ping. This is nice if we get delayed for
+	  whatever reason.
+	* Changed URL in templates to point to www.palfrader.org/echolot
+	  instead of the savannah page.
+	
+	How to upgrade (assuming you have a default configuration):
+	   ./pingd stop
+	   mv gnupg gnupghome
+	   vi pingd.conf (remove Pinger::Mix, set mixmaster;
+	                  cf. pingd.conf.sample )
+	  ./pingd [...] start
+
+Changes in version 2.0beta16 - 2002-07-17
+	* Do not send all pings for the same remailer at the same time
+	* The cheap hashing function that was used for determining when to ping
+	  was replaced by md5. The local secret also is an input to the
+	  function so not all echolot pingers ping the same remailer at the
+	  same time.
+	* In the distribution the pingd.conf file has been renamed to pingd.conf.
+	  So it should be possible to just untar the new tar.gz over the old
+	  installation (you have a backup anyway, don't you?).
+	* The getkeyconf command takes optional addresses to request config
+	  data from.
+	* The getkeyconf config option was replaced by getkeyconf_interval and
+	  getkeyconf_every_nth_time. Not all requests are sent at the same time
+	  any more.
+	* Stats can be sorted by latency rather than nick. Set
+	  stats_sort_by_latency if you want that.
+
+Changes in version 2.0beta15 - 2002-07-16
+	* Have echolot version in stats HTML pages
+	* Random documentation fixes
+	* Make it runs with older perls (5.005_03 is tested)
+          - always pass two arguments to mkdir()
+	  - import SEEK_ constants from POSIX rather than Fcntl
+	  - do not use warnings
+
+Changes in version 2.0beta14 - 2002-07-16
+	* Added commands buildstats buildkeys and buildthesaurus
+	* Added legend to templates (Orange)
+	* Thesaurus building failed when an id did not return a
+	  valid remailer. A check was there bug it was wrong
+	* Have pingd.conf.5 manpage documenting all options
+
+Changes in version 2.0beta13 - 2002-07-13
+	* Have correct title tags and some layout changes in the HTML templates
+	* Encode HTML Entities in HTML Stats
+	* Only show valid remailers in Thesaurus
+	* Support »not a remailer« reply to remailer-xxx
+	* Make sure only the right keys are exported to the pgp keyrings
+	* Do not skip key if GnuPG returns something in stderr with
+	  remailer-key replies
+
+Changes in version 2.0beta12 - 2002-07-11
+	* Cut strings when they do not fit in the table formats
+	* Sort type2.list/pubring.mix
+
+Changes in version 2.0beta11 - 2002-07-11
+	* Don't run in Taint mode anymore per default.
+	  If you still want it, trimm your PATH to something acceptable
+	  for perl and add »-T« to the first line of pingd.
+
+Changes in version 2.0beta10 - 2002-07-11
+	* Don't reset PATH to /usr/bin:/bin any more (Yes, again)
+	* Documentation updates
+
+Changes in version 2.0beta9 - 2002-07-11
+	* Don't reset PATH to /usr/bin:/bin any more
+	* Use confess or cluck instead of croak in some places.
+
+Changes in version 2.0beta8 - 2002-07-10
+	* Fix public clist.
+
+Changes in version 2.0beta7 - 2002-07-10
+	* fixed a stupid syntax bug.
+
+Changes in version 2.0beta6 - 2002-07-10
+	* Did away with Mail::Internet. Using local sendmail binary only.
+	  This also means the smarthost config option is obsolete and there
+	  is a sendmail config option now.
+
+Changes in version 2.0beta5 - 2002-07-10
+	* Thesaurus filenames changed from nn-foo to nn.foo.
+	  Use the change-thesaurus-filenames script in the tools
+	  directory to convert your current thesaurus if you wish
+	  to keep the data.
+	* Seperate rlists for rsa, dsa and plaintext pings are
+	  supported now. Enable seperate_rlists in pingd.conf.
+	* Have a combined list. Enable with combined_list in pingd.conf.
+
+Changes in version 2.0beta4 - 2002-07-10
+	* Minor documentation fixes
+	* Added --process switch
+	* Die if metadata or conf data cannot be parsed
+	* Build manpage into extra file
+
+Changes in version 2.0beta3 - 2002-07-10
+	* Fixed a small bug with writing the metadata so that it could not be
+	  parsed again
+
+Changes in version 2.0beta2 - 2002-07-10
+	* Moved from XML to Data::Dumper
+	  Use convert-xml-to-datadumper in the tools directory to
+	  convert your setup:
+	    pingd stop
+	    mv pingd.conf pingd.conf.old
+	    mv data/metadata data/metadata.old
+	    convert-xml-to-datadumper CONFIG < pingd.conf.old > pingd.conf
+	    convert-xml-to-datadumper METADATA < data/metadata.old > data/metadata
+	    pingd start
+
+Changes in version 2.0beta1 - 2002-07-07
+	* Initial public beta test

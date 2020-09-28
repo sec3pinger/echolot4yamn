@@ -1,0 +1,170 @@
+#!/bin/sh
+#
+#
+# This file is part of Echolot - a Pinger for anonymous remailers.
+#
+# Copyright (c) 2002 admin@arancio.net
+# Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2012, 2014 Peter Palfrader <peter@palfrader.org>
+#
+# This program is free software. you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+#
+
+# pingcntl: echolot control + wrapper
+
+set -e
+
+################################################################
+# You perhaps want to change those items
+
+USER=pinger
+VERBOSE=0
+BASEDIR="/home/pinger/echolot"
+PINGD="$BASEDIR/pingd"
+PIDFILE="$BASEDIR/pingd.pid"
+
+# You probably don't want to mess with stuff below this line
+################################################################
+
+CHECKULIMIT=1
+CHECKUID=1
+
+
+wait_for_deaddaemon () {
+	PID=$1
+	sleep 3
+	if test -n "$PID"
+	then
+		if kill -0 $PID 2>/dev/null
+		then
+			echo -n "Waiting for pid $PID ."
+			cnt=0
+			while kill -0 $PID 2>/dev/null
+			do
+				cnt=`expr $cnt + 1`
+				if [ $cnt -gt 30 ]
+				then
+					echo " Failed.. "
+					exit 1;
+				fi
+				sleep 2
+				echo -n "."
+			done
+			rm -f $PIDFILE
+		else
+			rm -f $PIDFILE
+		fi
+	fi
+}
+
+
+# Check for evil ulimits
+if [ "$CHECKULIMIT" -gt "0" ]; then
+	FDs=`ulimit -n`
+	HFDs=`ulimit -H -n`
+	if [ "$FDs" -lt "512" ]; then
+		if [ "$HFDs" -lt "512" ]; then
+			echo "Hardlimit for open File Descriptors is less than 512." >&2
+			echo "Please consider raising it." >&2
+			if [ "$FDs" -lt "$HFDs" ]; then
+				echo "Raising it to $HFDs" >&2
+				ulimit -n $HFDs
+			fi
+		else
+			if [ "$HFDs" -lt "1024" ]; then
+				FDs=$HFDs
+			else
+				FDs=1024
+			fi
+			echo "Softlimit for open File Descriptors is less than 512." >&2
+			echo "Raising it to $FDs" >&2
+			ulimit -n $FDs
+		fi
+	fi
+fi
+
+
+# Check for right User
+SU=""
+if [ "$CHECKUID" -gt "0" ]; then
+	CUID=`id -u`
+	CUIDNAME=`id -nu`
+	if [ "$CUIDNAME" = "$USER" ]; then
+		SU=""
+	elif [ "$CUID" = "0" ]; then
+		SU="su $USER -c"
+	else
+		echo "You are neither $USER nor root. Aborting." >&2
+		exit 1;
+	fi
+fi
+
+# set VERBOSE
+if [ $VERBOSE -gt 0 ]; then
+	VERBOSE="--verbose"
+else
+	VERBOSE=""
+fi
+
+
+case $1 in
+
+start)
+	if [ -f $PIDFILE ] ; then
+		PID=`cat $PIDFILE 2>/dev/null` || true
+		if kill -0 $PID 2>/dev/null
+		then
+			echo "pingd already running."
+			exit 0
+		else
+			echo -n "Removing stale pid file: "
+			rm -f $PIDFILE
+			echo "$PIDFILE."
+		fi
+	fi
+	echo -n "Starting Echolot: pingd" 
+	if [ ! -z "$SU" ]; then
+		$SU "$PINGD --detach $VERBOSE start"
+	else
+		$PINGD --detach $VERBOSE start
+	fi
+	echo "."
+	;;
+
+stop)
+	echo -n "Stopping Echolot: pingd" 
+	if [ ! -z "$SU" ]; then
+ 		$SU "$PINGD stop"
+	else
+ 		$PINGD stop
+	fi
+	echo "."
+	;;
+
+reload|force-reload|restart)
+	PID=`cat $PIDFILE 2>/dev/null` || true
+	$0 stop
+	wait_for_deaddaemon $PID
+	$0 start
+	;;
+*)
+	echo "Usage: $0 (start|stop|reload|force-reload|restart)" >&2
+	exit 1
+	;;
+esac
+
+exit 0
+
+# vim:set ts=2:
+# vim:set shiftwidth=2:

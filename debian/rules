@@ -1,0 +1,74 @@
+#!/usr/bin/make -f
+# Sample debian/rules that uses debhelper.
+# GNU copyright 1997 to 1999 by Joey Hess.
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+version=`grep 'VERSION =' pingd | sed -e "s/.* '//" -e "s/'.*//"`
+REMAILERS=`tr '\n' ' ' < debian/remailers`
+
+ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -g
+endif
+ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
+	INSTALL_PROGRAM += -s
+endif
+
+build: build-stamp
+build-stamp:
+	touch build-stamp
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	rm -f build-stamp
+
+	dh_clean
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	tar c                    Echolot   | tar xv -C $(CURDIR)/debian/echolot/usr/share/perl5/
+	tar c  --exclude LICENSE templates | tar xv -C $(CURDIR)/debian/echolot/etc/echolot
+	install -m 755 pingd $(CURDIR)/debian/echolot/usr/bin/
+	install -m 644 debian/pingd.conf $(CURDIR)/debian/echolot/etc/echolot
+	install -m 644 debian/echolot.default $(CURDIR)/debian/echolot/etc/default/echolot
+
+
+binary-indep: build install
+	dh_testdir
+	dh_testroot
+	dh_installdebconf
+	dh_installdocs
+	dh_installmenu
+	dh_installlogrotate
+	dh_installman
+	dh_installchangelogs NEWS
+	dh_installinit
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary-arch:
+# We have nothing to do by default.
+
+binary: binary-indep binary-arch
+
+update-remailers:
+	dh_testdir
+	wget -O - http://stats.melontraffickers.com/mlist2.txt | grep '@' | sed -e 's/.*<//' -e 's/>.*//' > debian/remailers
+
+debian/remailers: update-remailers
+
+.PHONY: build clean binary-indep binary-arch binary install configure remailers

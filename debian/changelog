@@ -1,0 +1,349 @@
+echolot (2.1.9-1) unstable; urgency=medium
+
+  * New upstream version.
+
+ -- Peter Palfrader <weasel@debian.org>  Wed, 22 Oct 2014 21:04:17 +0200
+
+echolot (2.1.8-8) unstable; urgency=low
+
+  * Really fix the markup typo in the pingd manpage.
+
+ -- Peter Palfrader <weasel@debian.org>  Mon, 15 Oct 2012 17:01:32 +0200
+
+echolot (2.1.8-7) unstable; urgency=low
+
+  * No longer ship /var/run/echolot in the package.  Based upon
+    work by Thomas Goirand (closes: #689889).
+  * Fix a markup typo in the pingd manpage.
+  * Fix an error in README.Debian where we say /etc/default/echolot
+    when we mean /etc/init.d/echolot.
+  * Fix a spelling mistake in README.Debian (closes: #459926).
+  * Fix the name of an option in an example in pingd.conf(5)
+    (closes: #459938).
+  * Update the address for the remops mailinglist in README.Debian
+    (closes: #563810).
+
+ -- Peter Palfrader <weasel@debian.org>  Mon, 15 Oct 2012 16:24:47 +0200
+
+echolot (2.1.8-6) unstable; urgency=low
+
+  * In postrm during purge remove (rm -rf) /var/lib/echolot instead of
+    /var/lib/echolot/*.  (This seems cleaner, even tho /var/lib/echolot, the
+    directory, should be removed a bit later by dpkg anyway since it's part of
+    the package.  Since it is the home directory of the echolot user it quite
+    possible that some admin action caused dot files to appear in that
+    directory.)
+  * Also rm -rf /var/log/echolot in postrm purge (closes: #455105).
+  * Move DH_COMPAT from the rules file into debian/compat.
+  * Add LSB tags to init script.
+
+ -- Peter Palfrader <weasel@debian.org>  Mon, 10 Dec 2007 10:39:41 +0100
+
+echolot (2.1.8-5) unstable; urgency=low
+
+  * Increase Standards-Version from 3.6.2 to 3.7.2 without any
+    additional changes.
+  * Change the build time dependency on debhelper from a
+    Build-Depends-Indep to Build-Depends.
+
+ -- Peter Palfrader <weasel@debian.org>  Sat, 17 Jun 2006 20:51:59 +0200
+
+echolot (2.1.8-4) unstable; urgency=low
+
+  * Properly quote arguments to su -c, since its behaviour has changed.
+  * Update to debhelper compatibility level 4, no other changes required
+    (we were already build depending on debhelper >= 4.1.16).
+
+ -- Peter Palfrader <weasel@debian.org>  Mon,  6 Mar 2006 15:54:57 +0100
+
+echolot (2.1.8-3) unstable; urgency=low
+
+  * Increase Standards-Version to 3.6.2 from 3.6.1.
+  * Add dependency on adduser since we need it in postinst.
+  * Fix format of chown argument from echolot.adm to echolot:adm.
+  * Update FSF address in debian/copyright.
+
+ -- Peter Palfrader <weasel@debian.org>  Sun,  9 Oct 2005 23:26:28 +0200
+
+echolot (2.1.8-2) unstable; urgency=low
+
+  * Since we removed all the debconf templates in 2.1.7-1 we don't need
+    to depend on debconf at all.  If it is installed however we still
+    purge our debconf database on upgrades  (closes: #331811).
+
+ -- Peter Palfrader <weasel@debian.org>  Sun,  9 Oct 2005 23:17:48 +0200
+
+echolot (2.1.8-1) unstable; urgency=low
+
+  * New upstream version:
+     - redirect init script output to /dev/null in logrotate.
+
+ -- Peter Palfrader <weasel@debian.org>  Mon, 25 Apr 2005 02:13:29 +0200
+
+echolot (2.1.7-1) unstable; urgency=low
+
+  * New upstream version:
+    - remove debconf stuff.
+    - create echolot group in proper gid space.
+    - modify init script to allow 'enable' and 'disable' command.
+
+ -- Peter Palfrader <weasel@debian.org>  Sun, 14 Nov 2004 23:33:41 +0100
+
+echolot (2.1.6-2) unstable; urgency=low
+
+  * Add disable and enable to allowed commands in init script.
+
+ -- Peter Palfrader <weasel@debian.org>  Sat, 25 Sep 2004 16:49:11 +0200
+
+echolot (2.1.6-1) unstable; urgency=medium
+
+  * New upstream version, catch one use of an undefined variable in
+    logging.
+
+ -- Peter Palfrader <weasel@debian.org>  Sat,  7 Aug 2004 16:00:52 +0200
+
+echolot (2.1.5-1) unstable; urgency=low
+
+  * New upstream version.
+
+ -- Peter Palfrader <weasel@debian.org>  Tue, 22 Jun 2004 11:40:01 +0200
+
+echolot (2.1.4-1) unstable; urgency=low
+
+  * New upstream version.
+  * Update debian/copyright to include 2004.
+  * Add dutch translation for debconf templates (closes: #249406).
+  * Update Standards-Version to 3.6.1.
+  * debian/rules: there is no lib/ to copy any longer.
+
+ -- Peter Palfrader <weasel@debian.org>  Thu, 10 Jun 2004 15:47:52 +0200
+
+echolot (2.1.3-1) unstable; urgency=low
+
+  * New upstream version.
+    closes: #243504 echolot: typo in month abbreviations
+  * Document exim's local_part_suffix in the recipient_delimiter
+    debconf question.
+    closes: #243496 Exim4 mailbox delimiter
+
+ -- Peter Palfrader <weasel@debian.org>  Tue, 20 Apr 2004 13:42:32 +0200
+
+echolot (2.1.2-1) unstable; urgency=low
+
+  * New upstream version.
+
+ -- Peter Palfrader <weasel@debian.org>  Tue,  4 Nov 2003 05:16:07 +0100
+
+echolot (2.1.1-1) unstable; urgency=low
+
+  * New upstream version.
+
+ -- Peter Palfrader <weasel@debian.org>  Sun,  2 Nov 2003 07:03:43 +0100
+
+echolot (2.1-2) unstable; urgency=low
+
+  * debconf internationialization.
+    Thanks to Christian Perrier for providing the patches and information.
+    closes: #212885 [INTL:fr] French translation of gettext debconf templates
+    closes: #211633 [INTL] Please switch to gettext-based debconf templates
+
+ -- Peter Palfrader <weasel@debian.org>  Sun, 12 Oct 2003 12:15:38 +0200
+
+echolot (2.1-1) unstable; urgency=low
+
+  * New upstream version.
+
+ -- Peter Palfrader <weasel@debian.org>  Mon,  3 Mar 2003 16:42:42 +0100
+
+echolot (2.0.10-1) unstable; urgency=low
+
+  * New upstream version.
+
+ -- Peter Palfrader <weasel@debian.org>  Mon,  3 Feb 2003 21:11:42 +0100
+
+echolot (2.0.9-1) unstable; urgency=medium
+
+  * New upstream version.
+  * Remove link from output to /var/log/echolot/echolot.log
+    since pngd now has some sort of saner logging.
+
+ -- Peter Palfrader <weasel@debian.org>  Tue, 14 Jan 2003 08:08:41 +0100
+
+echolot (2.0.8-1) unstable; urgency=medium
+
+  * New upstream version.
+    Fixes evil bug where pingd receives SIGPIPE because GnuPG already exited
+    because of unuseable keys.
+
+ -- Peter Palfrader <weasel@debian.org>  Mon, 13 Jan 2003 15:25:27 +0100
+
+echolot (2.0.7-1) unstable; urgency=low
+
+  * New upstream version.
+
+ -- Peter Palfrader <weasel@debian.org>  Wed, 18 Dec 2002 19:37:08 +0100
+
+echolot (2.0.6-1) unstable; urgency=low
+
+  * New upstream version.
+  * Fixed init.d script: s,devnull,dev/null,
+  * lintian: init-script-suggests-versioned-depends postinst on debconf.
+
+ -- Peter Palfrader <weasel@debian.org>  Wed, 18 Dec 2002 18:44:27 +0100
+
+echolot (2.0.5-2) unstable; urgency=low
+
+  * Add sendpings command to init script.
+  * Have Echolot disabled by default in /etc/default/echolot.
+  * Add some more comments to README.Debian.
+  * Also process pending commands upon pingd startup.
+
+ -- Peter Palfrader <weasel@debian.org>  Tue, 12 Nov 2002 02:06:17 +0100
+
+echolot (2.0.5-1) unstable; urgency=low
+
+  * New upstream version (supports use without user defined mailboxes).
+  * Make recipient delimiter configured by debconf.
+
+ -- Peter Palfrader <weasel@debian.org>  Fri, 25 Oct 2002 12:54:44 +0200
+
+echolot (2.0.4-3) unstable; urgency=low
+
+  * Add a debconf note about user defined mailboxes being required
+    (foo+bar@example.com).
+
+ -- Peter Palfrader <weasel@debian.org>  Thu, 24 Oct 2002 20:31:04 +0200
+
+echolot (2.0.4-2) unstable; urgency=low
+
+  * Change Depends from libdigest-MD5-perl to libdigest-md5-perl
+    (capitalization).
+  * Changed Standards-Version to 3.5.7 (no changes).
+
+ -- Peter Palfrader <weasel@debian.org>  Thu, 24 Oct 2002 13:40:41 +0200
+
+echolot (2.0.4-1) unstable; urgency=low
+
+  * New upstream version.
+  * Now that mixmaster got added to the main archive, finally upload
+    Echolot to Debian as well (closes: #164459).
+
+ -- Peter Palfrader <weasel@debian.org>  Wed, 16 Oct 2002 10:25:41 +0200
+
+echolot (2.0.3-3) unstable; urgency=low
+
+  * Remove Suggests: procmail.
+  * Copy new description from README to control.
+  * Updated remailer list.
+  * Use a more correct directory structure
+    (usr/lib/echolot -> usr/share/perl5/)
+
+ -- Peter Palfrader <weasel@debian.org>  Sat, 12 Oct 2002 14:43:28 +0200
+
+echolot (2.0.3-2) unstable; urgency=low
+
+  * Fix config script to not screw up domainname on upgrades.
+
+ -- Peter Palfrader <weasel@debian.org>  Sat, 12 Oct 2002 12:05:28 +0200
+
+echolot (2.0.3-1) unstable; urgency=low
+
+  * Changed Section from contrib/mail to (main/)mail as mimxaster is
+    in main now.
+  * New upstream version.
+
+ -- Peter Palfrader <weasel@debian.org>  Sat, 12 Oct 2002 01:10:18 +0200
+
+echolot (2.0.2-1) unstable; urgency=low
+
+  * New upstream version.
+
+ -- Peter Palfrader <weasel@debian.org>  Sat, 21 Sep 2002 05:11:37 +0200
+
+echolot (2.0.1-1) unstable; urgency=low
+
+  * New upstream version.
+
+ -- Peter Palfrader <weasel@debian.org>  Sat, 21 Sep 2002 03:45:14 +0200
+
+echolot (2.0-1) unstable; urgency=low
+
+  * New upstream version:
+    This one's called 2.0.
+
+ -- Peter Palfrader <weasel@debian.org>  Tue, 17 Sep 2002 06:17:43 +0200
+
+echolot (000.2.0rc3-1) unstable; urgency=low
+
+  * New upstream version.
+
+ -- Peter Palfrader <weasel@debian.org>  Fri, 13 Sep 2002 01:16:21 +0200
+
+echolot (000.2.0rc2-1) unstable; urgency=low
+
+  * New upstream version.
+
+ -- Peter Palfrader <weasel@debian.org>  Sun,  8 Sep 2002 20:16:31 +0200
+
+echolot (000.2.0rc1-1) unstable; urgency=low
+
+  * New version number.
+
+ -- Peter Palfrader <weasel@debian.org>  Thu,  5 Sep 2002 16:51:42 +0200
+
+echolot (000.2.0beta34-1) unstable; urgency=low
+
+  * New upstream version
+
+ -- Peter Palfrader <weasel@debian.org>  Wed,  4 Sep 2002 13:22:13 +0200
+
+echolot (000.2.0beta33-1) unstable; urgency=low
+
+  * New upstream version
+
+ -- Peter Palfrader <weasel@debian.org>  Fri, 23 Aug 2002 09:54:10 +0200
+
+echolot (000.2.0beta32-1) unstable; urgency=low
+
+  * New upstream version
+
+ -- Peter Palfrader <weasel@debian.org>  Fri, 23 Aug 2002 08:05:26 +0200
+
+echolot (000.2.0beta31-1) unstable; urgency=low
+
+  * New upstream version
+
+ -- Peter Palfrader <weasel@debian.org>  Wed, 21 Aug 2002 21:45:37 +0200
+
+echolot (000.2.0beta30-1) unstable; urgency=low
+
+  * New upstream version
+
+ -- Peter Palfrader <weasel@debian.org>  Thu, 15 Aug 2002 05:28:11 +0200
+
+echolot (000.2.0beta29-1) unstable; urgency=low
+
+  * New upstream version
+
+ -- Peter Palfrader <weasel@debian.org>  Thu, 15 Aug 2002 00:54:31 +0200
+
+echolot (000.2.0beta28-1) unstable; urgency=low
+
+  * New upstream version
+
+ -- Peter Palfrader <weasel@debian.org>  Tue, 13 Aug 2002 07:58:31 +0200
+
+echolot (000.2.0beta27-1) unstable; urgency=low
+
+  * New upstream version
+  * Set the mixmaster binary path.
+  * Use --quiet when starting echolot.
+
+ -- Peter Palfrader <weasel@debian.org>  Tue, 13 Aug 2002 02:49:45 +0200
+
+echolot (000.2.0beta26-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Peter Palfrader <weasel@debian.org>  Mon, 12 Aug 2002 05:44:24 +0200
+

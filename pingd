@@ -1,0 +1,853 @@
+#!/usr/bin/perl -w
+#
+#
+# This file is part of Echolot - a Pinger for anonymous remailers.
+#
+# Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2012, 2014 Peter Palfrader <peter@palfrader.org>
+#
+# This program is free software. you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+
+$| = 1;
+
+=pod
+
+=head1 NAME
+
+pingd - echolot ping daemon
+
+=head1 SYNOPSIS
+
+=over
+
+=item B<pingd> B<start>
+
+=item B<pingd> B<stop>
+
+=item B<pingd> B<process>
+
+=item B<pingd> B<add> I<address> [I<address> ...]
+
+=item B<pingd> B<delete> I<address> [I<address> ...]
+
+=item B<pingd> B<disable> I<address> [I<address> ...]
+
+=item B<pingd> B<enable> I<address> [I<address> ...]
+
+=item B<pingd> B<set> option=value [option=value..] I<address> [I<address> ...]
+
+=item B<pingd> B<setremailercaps> I<capsstring>
+
+=item B<pingd> B<deleteremailercaps> I<address>
+
+=item B<pingd> B<getkeyconf> [I<address> [I<address> ...]]
+
+=item B<pingd> B<sendpings> [I<address> [I<address> ...]]
+
+=item B<pingd> B<sendchainpings> I<address>B<:>I<address> [I<address>B<:>I<address> ...]
+
+=item B<pingd> B<buildstats>
+
+=item B<pingd> B<buildkeys>
+
+=item B<pingd> B<buildthesaurus>
+
+=item B<pingd> B<buildfromlines>
+
+=item B<pingd> B<summary>
+
+=item B<pingd> B<dumpconf>
+
+=back
+
+=head1 DESCRIPTION
+
+pingd is the heart of echolot. Echolot is a pinger for anonymous remailers. 
+
+A Pinger in the context of anonymous remailers is a program that regularily
+sends messages through remailers to check their reliability. It then calculates
+reliability statistics which are used by remailer clients to choose the chain
+of remailers to use.
+
+Additionally it collects configuration parameters and keys of all remailers and
+offers them in a format readable by remailer clients. 
+
+When called without parameters pingd schedules tasks like sending pings,
+processing incoming mail and requesting remailer-xxx data and runs them at
+configurable intervalls.
+
+=head1 COMMANDS
+
+=over
+
+=item B<start>
+
+Start the ping daemon.
+
+=item B<stop>
+
+Send the running pingd process a SIGTERM.
+
+=item B<process>
+
+Sends a HUP signal to the daemon which instructs it to process the commands.
+
+For other effects of sending the HUP Signal see the SIGNALS section below.
+
+=item B<add> I<address> [I<address> ...]
+
+Add I<address> to the list of remailers to query for
+keys and confs.
+
+=item B<delete> I<address> [I<address> ...]
+
+Delete I<address> from the list of remailers to query for
+keys and confs. Delete all statistics and keys for that remailer.
+
+Note that echolot will add back this remailer if it learns of it from other
+remailers again.  If you do not want that, use the disable command.
+
+=item B<disable> I<address> [I<address> ...]
+
+Shorthand for B<set showit=off> B<pingit=off> B<fetch=off>.  This makes echolot
+completely ignore that remailer, until you enable it again.
+
+=item B<enable> I<address> [I<address> ...]
+
+Shorthand for B<set showit=on> B<pingit=on> B<fetch=on>.
+
+=item B<set> option=value [option=value..] I<address> [I<address> ...]
+
+Possible options and values:
+
+=over
+
+=item B<showit=>{B<on>,B<off>}
+
+Set B<showit> (show remailer in mlist, rlist etc.) for remailer I<address> to
+either B<on> or B<off>.
+
+=item B<pingit=>{B<on>,B<off>}
+
+Set B<pingit> (send out pings to that remailer) for remailer I<address> to
+either B<on> or B<off>.
+
+=item B<fetch=>{B<on>,B<off>}
+
+Set B<fetch> (fetch remailer-key and remailer-conf) for remailer I<address> to
+either B<on> or B<off>.
+
+=back
+
+=item B<setremailercaps> I<capsstring>
+
+Some remailers (Mixmaster V2 - currently lcs and passthru2) don't return a
+useable remailer-conf message. For such remailers you need to set it manually.
+
+For instance:
+
+    ./pingd setremailercaps '$remailer{"passthru2"} = "<mixer@immd1.informatik.uni-erlangen.de> mix middle";'
+    ./pingd setremailercaps '$remailer{"lcs"} = "<mix@anon.lcs.mit.edu> mix klen1000";'
+
+=item B<deleteremailercaps> I<address>
+
+Delete remailer-conf data for I<address>. The config data will be reset from
+the next valid remailer-conf reply by the remailer.
+
+=item B<getkeyconf> [I<address> [I<address> ...]]
+
+Send a command to immediatly request keys and configuration from remailers.
+If no addresses are given requests will be sent to all remailers.
+
+=item B<sendpings> [I<address> [I<address> ...]]
+
+Send a command to immediatly send pings to the given remailers.
+If no addresses are given requests will be sent to all remailers.
+
+=item B<sendchainpings> I<address>B<:>I<address> [I<address>B<:>I<address> ...]
+
+Send a command to immediatly send chain pings to the given chains.
+A chain is two remailer addresses seperated by a colon.
+
+=item B<buildstats>
+
+Send a command to immediatly rebuild stats.
+
+=item B<buildkeys>
+
+Send a command to immediatly rebuild the keyrings.
+
+=item B<buildthesaurus>
+
+Send a command to immediatly rebuild the Thesaurus.
+
+=item B<buildfromlines>
+
+Send a command to immediatly rebuild the From Header lines page.
+
+=item B<summary>
+
+Print a status summary of all known addresses to the log (level notice).
+
+=item B<dumpconf>
+
+Dumps the current configuration to standard output.
+
+=back
+
+=head1 OPTIONS
+
+=over
+
+=item B<--basedir>
+
+The home directory to which everything else is relative. See the BASE
+DIRECTORY section below.
+
+=item B<--verbose>
+
+Verbose mode. Causes B<pingd> to print debugging messages about its progress.
+
+=item B<--quiet>
+
+Quiet mode. Be even quieter than normal.
+
+=item B<--help>
+
+Print a short help message and exit sucessfully.
+
+=item B<--version>
+
+Print version number and exit sucessfully.
+
+=item B<--nohup>
+
+Usefull only with the B<add>, B<set>, B<setremailercaps>,
+B<deleteremailercaps>, B<getkeyconf>, B<sendpings>, B<sendchainpings>,
+B<buildstats>, B<buildkeys>, B<buildthesaurus>, B<buildfromlines>,
+or B<summary> command.
+
+Don't send a HUP signal to the daemon which instructs it to process the
+commands after adding the command to the task list.
+
+By default such a signal is sent.
+
+=item B<--process>
+
+Usefull only with the B<start> command.
+
+Read and process the commands file on startup.
+
+=item B<--detach>
+
+Usefull only with the B<start> command.
+
+Tell B<pingd> to detach.
+
+=back
+
+=head1 BASE DIRECTORY
+
+The home directory to which everything else is relative.
+
+Basedir defaults to whatever directory the B<pingd> binary is located. It can
+be overridden by the B<ECHOLOT_HOME> environment variable which in turn is
+weaker than the B<--basedir> setting.
+
+This directory is then used to locate the configuration file B<pingd.conf> (see
+FILES below).
+
+The B<homedir> setting in B<pingd.conf> finally sets the base directory.
+
+=head1 FILES
+
+The configuration file is searched in these places in this order:
+
+=over   
+
+=item the file pointed to by the B<ECHOLOT_CONF> environment variable
+
+=item <basedir>/pingd.conf
+
+=item $HOME/echolot/pingd.conf
+
+=item $HOME/pingd.conf
+
+=item $HOME/.pingd.conf
+
+=item /etc/echolot/pingd.conf
+
+=item /etc/pingd.conf
+
+=back
+
+=head1 ENVIRONMENT
+
+=over
+
+=item ECHOLOT_CONF echolot config file (see section FILES)
+
+=item ECHOLOT_HOME echolot base directory (see section BASE DIRECTORY)
+
+=back
+
+=head1 SIGNALS
+
+On B<SIGINT>, B<SIGQUIT>, and B<SIGTERM> B<pingd> will schedule a shutdown
+for as soon as the current actions are finished or immediatly if no actions are
+currently being processed. It will then write all metadata and pingdata to
+disk and close all files cleanly before exiting.
+
+On B<SIGHUP> <pingd> will execute any pending commands from the commands file
+(B<commands.txt> by default).  It also closes and reopens the file 'output'
+which is used for stdout and stderr when the daemon is running detached.
+This can be used if you want to rotate that file.
+
+=head1 AUTHOR
+
+Peter Palfrader E<lt>peter@palfrader.orgE<gt>
+
+=head1 BUGS
+
+Please report them at E<lt>URL:http://alioth.debian.org/projects/echolot/E<gt>
+
+=cut
+
+use strict;
+use FindBin qw{ $Bin };
+use lib ( $Bin, "$Bin/lib" );
+use Getopt::Long;
+use English;
+use Carp;
+use Echolot::Config;
+use Echolot::Globals;
+use Echolot::Storage::File;
+use Echolot::Scheduler;
+use Echolot::Conf;
+use Echolot::Mailin;
+use Echolot::Pinger;
+use Echolot::Chain;
+use Echolot::Stats;
+use Echolot::Commands;
+use Echolot::Thesaurus;
+use Echolot::Fromlines;
+use Echolot::Report;
+use Echolot::Log;
+use POSIX qw(setsid);
+
+delete @ENV{'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};
+
+
+my $VERSION = '2.1.9';
+
+
+my $redirected_stdio = 0;
+
+sub setSigHandlers() {
+	$SIG{'HUP'} = sub {
+		Echolot::Log::info("Got SIGHUP. scheduling readcommands.");
+		Echolot::Globals::get()->{'scheduler'}->schedule('readcommands', 0, time() );
+		if ($redirected_stdio) {
+			close STDOUT;
+			close STDERR;
+			my $logfile = Echolot::Config::get()->{'logfile'};
+			open (STDOUT, ">>$logfile") or die ("Cannot open '$logfile' as STDOUT\n");
+			open (STDERR, ">&STDOUT") or die ("Cannot dup STDOUT as STDERR\n");
+		};
+		Echolot::Log::reopen();
+	};
+	$SIG{'INT'} = sub {
+		Echolot::Log::info("Got SIGINT. scheduling exit.");
+		Echolot::Globals::get()->{'scheduler'}->schedule('exit', 0, 0 );
+	};
+	$SIG{'QUIT'} = sub {
+		Echolot::Log::info("Got SIGQUIT. scheduling exit.");
+		Echolot::Globals::get()->{'scheduler'}->schedule('exit', 0, 0 );
+	};
+	$SIG{'TERM'} = sub {
+		Echolot::Log::info("Got SIGTERM. scheduling exit.");
+		Echolot::Globals::get()->{'scheduler'}->schedule('exit', 0, 0 );
+	};
+	$SIG{'PIPE'} = sub {
+		Echolot::Log::error("Got SIGPIPE");
+	};
+};
+
+
+
+sub commit_prospective_address() {
+	Echolot::Globals::get()->{'storage'}->commit_prospective_address();
+};
+sub expire() {
+	Echolot::Globals::get()->{'storage'}->expire();
+};
+sub metadata_backup() {
+	Echolot::Globals::get()->{'storage'}->metadata_backup();
+};
+
+
+
+
+
+sub command_adddelete(@) {
+	my $command = shift @_;
+	my @argv = @_;
+
+	die ("command_adddelete requires command\n") unless defined $command;
+	die ("add requires argument <address>\n") unless scalar @argv;
+	my @addresses;
+	for my $address (@argv) {
+		die ("argument <address> is not a valid email address\n") unless ($address =~ /^[a-zA-Z0-9+._-]+\@[a-zA-Z0-9+.-]+$/ );
+		push @addresses, $address;
+	};
+	for my $address (@addresses) {
+		Echolot::Commands::addCommand("$command $address");
+	};
+};
+
+sub command_set(@) {
+	my @argv = @_;
+
+	my @settings;
+	while (scalar @argv && $argv[0] =~ /^(show(?:it)?|ping(?:it)?|fetch(?:it)?)=(on|off)$/) {
+		my $name = $1;
+		my $value = $2;
+
+		$name = 'showit' if ($name eq 'show');
+		$name = 'pingit' if ($name eq 'ping');
+		$name = 'fetch' if ($name eq 'fetchit');
+
+		push @settings, "$name=$value";
+		shift @argv;
+	};
+
+	my @addresses;
+	for my $address (@argv) {
+		die ("argument $address is not a valid email address\n") unless ($address =~ /^[a-zA-Z0-9+._-]+\@[a-zA-Z0-9+.-]+$/ );
+		push @addresses, $address;
+	};
+
+	for my $address (@argv) {
+		for my $setting (@settings) {
+			Echolot::Commands::addCommand("set $address $setting");
+		};
+	};
+};
+
+sub command_enabledisable (@) {
+	my @argv = @_;
+
+	my $command = shift @argv;
+	my $value;
+	if ($command eq 'enable') {
+		$value='on';
+	} elsif ($command eq 'disable') {
+		$value='off';
+	} else {
+		die ("argument $command is not enable or disable.  Shouldn't even be here.\n");
+	};
+	my @cmd = ("showit=$value", "pingit=$value", "fetch=$value");
+	push @cmd, @argv;
+	command_set(@cmd);
+}
+
+
+sub command_setremailercaps(@) {
+	my @argv = @_;
+
+	my @caps;
+	for my $caps (@argv) {
+		my ($remailer_nick, $remailer_address) = ($caps =~ /^\s*  \$remailer\{"(.*)"}  \s*=\s*  "<(.*@.*)>.*";   \s*$/ix);
+		die ("caps '$caps' is not a valid remailer caps line\n") unless (defined $remailer_nick && defined $remailer_address);
+		push @caps, {
+			address => $remailer_address,
+			caps => $caps };
+	};
+	for my $caps (@caps) {
+		Echolot::Commands::addCommand("setremailercaps ".$caps->{'address'}." ".$caps->{'caps'});
+	};
+};
+
+sub command_deleteremailercaps(@) {
+	my @argv = @_;
+
+	my @addresses;
+	for my $address (@argv) {
+		die ("argument $address is not a valid email address\n") unless ($address =~ /^[a-zA-Z0-9+._-]+\@[a-zA-Z0-9+.-]+$/ );
+		push @addresses, $address;
+	};
+
+	for my $address (@addresses) {
+		Echolot::Commands::addCommand("deleteremailercaps $address");
+	};
+};
+
+sub command_getkeyconf(@) {
+	my @argv = @_;
+
+	my @addresses;
+	for my $address (@argv) {
+		die ("argument $address is not a valid email address\n") unless ($address =~ /^[a-zA-Z0-9+._-]+\@[a-zA-Z0-9+.-]+$/ );
+		push @addresses, $address;
+	};
+
+	push @addresses, 'all' unless (scalar @addresses);
+
+	for my $address (@addresses) {
+		Echolot::Commands::addCommand("getkeyconf $address");
+	};
+};
+
+sub command_sendpings(@) {
+	my @argv = @_;
+
+	my @addresses;
+	for my $address (@argv) {
+		die ("argument $address is not a valid email address\n") unless ($address =~ /^[a-zA-Z0-9+._-]+\@[a-zA-Z0-9+.-]+$/ );
+		push @addresses, $address;
+	};
+
+	push @addresses, 'all' unless (scalar @addresses);
+
+	for my $address (@addresses) {
+		Echolot::Commands::addCommand("sendpings $address");
+	};
+};
+
+sub command_sendchainpings(@) {
+	my @argv = @_;
+
+	my @args;
+	for my $arg (@argv) {
+		my ($addr1, $addr2) = split /:/, $arg;
+		die ("Argument $arg is not in the form address1:address2") unless defined $addr1 && defined $addr2;
+		die ("Address 1 in $arg ('$addr1') is not a valid email address\n") unless ($addr1 =~ /^[a-zA-Z0-9+._-]+\@[a-zA-Z0-9+.-]+$/ );
+		die ("Address 2 in $arg ('$addr2') is not a valid email address\n") unless ($addr2 =~ /^[a-zA-Z0-9+._-]+\@[a-zA-Z0-9+.-]+$/ );
+		push @args, [ $addr1, $addr2 ];
+	};
+
+	for my $arg (@args) {
+		Echolot::Commands::addCommand("sendchainpings $arg->[0] $arg->[1]");
+	};
+};
+
+
+sub pid_exists($) {
+	my ($remove_stale) = @_;
+
+	my $pidfile = Echolot::Config::get()->{'pidfile'};
+	if (! $remove_stale) {
+		return (-e $pidfile);
+	} else {
+		if (!-e $pidfile) {
+			return 0;
+		};
+
+		open (PIDFILE, $pidfile) or
+			die ("Cannot open pidfile '$pidfile': $!.\n");
+		my $line = <PIDFILE>;
+		close PIDFILE;
+
+		my ($pid, $host, $time) = $line =~ /^(\d+) \s+ (\S+) \s+ (\d+) \s* $/x or
+			die ("Cannot parse pidfile '$pidfile' line '$line'.\n");
+
+		(Echolot::Globals::get()->{'hostname'} eq $host) or
+			die ("Pidfile exists and is from another host.\n");
+		($host ne 'unknown') or
+			die ("Pidfile exists and hostname is unknown.\n");
+		($time < time()) or
+			die ("Pidfile exists and timestamp is in the future.\n");
+		my $sent = kill 0, $pid;
+		($sent == 0) or
+			die ("Pidfile exists and process $pid running.\n");
+		warn ("Removing stale pidfile.\n");
+		unlink ($pidfile) or
+			die ("Removing stale pidfile $pidfile failed.\n");
+		return 0;
+	}
+
+
+};
+
+sub daemon_run($) {
+	my ($process) = @_;
+
+	Echolot::Log::logdie("Pidfile '".Echolot::Config::get()->{'pidfile'}."' exists\n")
+		if pid_exists(0);
+	open (PIDFILE, '>'.Echolot::Config::get()->{'pidfile'}) or
+		Echolot::Log::logdie("Cannot open pidfile '".Echolot::Config::get()->{'pidfile'}."': $!");
+	print PIDFILE "$PROCESS_ID ".Echolot::Globals::get()->{'hostname'}." ".time()."\n";
+	close PIDFILE;
+
+	Echolot::Globals::initStorage();
+	setSigHandlers();
+
+	Echolot::Globals::get()->{'scheduler'} = new Echolot::Scheduler;
+	my $scheduler = Echolot::Globals::get()->{'scheduler'};
+	$scheduler->add('exit'                ,     -1                                           , 0, 0, 'exit' );
+	$scheduler->add('readcommands'        ,     -1                                           , 0, 1, \&Echolot::Commands::processCommands );
+
+	$scheduler->add('processmail'         , Echolot::Config::get()->{'processmail'}          , 0, 1, \&Echolot::Mailin::process );
+	$scheduler->add('ping'                , Echolot::Config::get()->{'pinger_interval'}      , 0, 0, \&Echolot::Pinger::send_pings );
+	$scheduler->add('chainping'           , Echolot::Config::get()->{'chainpinger_interval'} , 0, 0, \&Echolot::Chain::send_pings );
+	$scheduler->add('buildstats'          , Echolot::Config::get()->{'buildstats'}           , 0, 1, \&Echolot::Stats::build_stats );
+	$scheduler->add('buildkeys'           , Echolot::Config::get()->{'buildkeys'}            , 0, 1, \&Echolot::Stats::build_keys );
+	$scheduler->add('buildthesaurus'      , Echolot::Config::get()->{'buildthesaurus'}       , 0, 1, \&Echolot::Thesaurus::build_thesaurus );
+	$scheduler->add('buildfromlines'      , Echolot::Config::get()->{'buildfromlines'}       , 0, 1, \&Echolot::Fromlines::build_fromlines );
+
+	$scheduler->add('metadata_backup'     , Echolot::Config::get()->{'metadata_backup'}      , 0, 1, \&metadata_backup );
+	$scheduler->add('commitprospectives'  , Echolot::Config::get()->{'commitprospectives'}   , 0, 1, \&commit_prospective_address );
+	$scheduler->add('expire'              , Echolot::Config::get()->{'expire'}               , 0, 1, \&expire );
+	$scheduler->add('getkeyconf'          , Echolot::Config::get()->{'getkeyconf_interval'}  , 0, 0, \&Echolot::Conf::send_requests );
+	$scheduler->add('check_resurrection'  , Echolot::Config::get()->{'check_resurrection'}   , 0, 0, \&Echolot::Conf::check_resurrection );
+	$scheduler->add('cleanup_tmp'         , Echolot::Config::get()->{'cleanup_tmpdir'}       , 0, 1, \&Echolot::Tools::cleanup_tmp );
+
+	$scheduler->add('summary'             , Echolot::Config::get()->{'summary'}              , 0, 1, \&Echolot::Report::print_summary );
+
+	Echolot::Globals::get()->{'scheduler'}->schedule('readcommands', 0, time() )
+		if ($process);
+
+	$scheduler->run();
+
+	Echolot::Globals::get()->{'storage'}->commit();
+	Echolot::Globals::get()->{'storage'}->finish();
+
+	unlink (Echolot::Config::get()->{'pidfile'}) or
+		Echolot::Log::warn ("Cannot unlink pidfile ".Echolot::Config::get()->{'pidfile'}.".");
+};
+
+sub send_sig($) {
+	my ($sig) = @_;
+
+	die ("Pidfile '".Echolot::Config::get()->{'pidfile'}."' does not exist\n")
+		unless pid_exists(0);
+	open (PIDFILE, '<'.Echolot::Config::get()->{'pidfile'}) or
+		confess ("Cannot open pidfile '".Echolot::Config::get()->{'pidfile'}."': $!\n");
+	my $line = <PIDFILE>;
+	close PIDFILE;
+
+	my ($pid, $host, $time) = $line =~ /^(\d+) \s+ (\S+) \s+ (\d+) \s* $/x or
+		confess ("Cannot parse pidfile '$line'\n");
+	my $sent = kill $sig, $pid;
+	($sent == 1) or
+		confess ("Did not send signal $sig to exactly one process but $sent. (pidfile reads $line)\n");
+};
+
+sub daemon_hup() {
+	send_sig(1);
+};
+
+sub daemon_stop() {
+	send_sig(15);
+};
+
+sub make_dirs() {
+	for my $dir (
+		Echolot::Config::get()->{'resultdir'},
+		Echolot::Config::get()->{'thesaurusdir'},
+	) {
+		if ( ! -d $dir ) {
+			mkdir ($dir, 0755) or
+				confess ("Cannot create directory $dir: $!\n");
+		};
+	};
+	my @dirs = (
+		Echolot::Config::get()->{'private_resultdir'},
+		Echolot::Config::get()->{'gnupghome'},
+		Echolot::Config::get()->{'mixhome'},
+		Echolot::Config::get()->{'tmpdir'},
+		Echolot::Config::get()->{'storage'}->{'File'}->{'basedir'},
+		Echolot::Config::get()->{'mailerrordir'},
+		Echolot::Config::get()->{'mailerrordir'}.'/cur',
+		Echolot::Config::get()->{'mailerrordir'}.'/tmp',
+		Echolot::Config::get()->{'mailerrordir'}.'/new');
+	push @dirs, (
+		Echolot::Config::get()->{'mailin'}.'/cur',
+		Echolot::Config::get()->{'mailin'}.'/tmp',
+		Echolot::Config::get()->{'mailin'}.'/new' )
+		if (-d Echolot::Config::get()->{'mailin'});
+		
+	for my $dir (@dirs) {
+		if ( ! -d $dir ) {
+			mkdir ($dir, 0700) or
+				confess ("Cannot create directory $dir: $!\n");
+		};
+	};
+};
+
+sub hup_if_wanted($) {
+	my ($nohup) = @_;
+	if (!$nohup && pid_exists(0)) {
+		daemon_hup()
+	} else {
+		print "Don't forget to run $PROGRAM_NAME process.\n";
+	};
+};
+
+
+
+
+
+
+
+
+($EUID == 0) and
+	die("$PROGRAM_NAME should not be run as root.\n");
+
+my $params = { basedir => $Bin };
+$params->{'basedir'} = $ENV{'ECHOLOT_HOME'} if (defined $ENV{'ECHOLOT_HOME'});
+
+Getopt::Long::config('bundling');
+if (!GetOptions (
+	'help'     =>  \$params->{'help'},
+	'version'  =>  \$params->{'version'},
+	'verbose+' =>  \$params->{'verbose'},
+	'nohup'    =>  \$params->{'nohup'},
+	'detach'   =>  \$params->{'detach'},
+	'process'  =>  \$params->{'process'},
+	'basedir'  =>  \$params->{'basedir'},
+	'quiet'    =>  \$params->{'quiet'},
+	)) {
+	die ("$PROGRAM_NAME: Usage: $PROGRAM_NAME [-fwhv]\n");
+};
+if ($params->{'help'}) {
+    print ("Usage: $PROGRAM_NAME [options] command\n");
+    print ("See man pingd or perldoc pingd for more info.\n");
+    print ("echolot $VERSION - (c) 2002, 2003, 2004 Peter Palfrader <peter\@palfrader.org>\n");
+    print ("http://alioth.debian.org/projects/echolot/\n");
+	print ("\n");
+	print ("Commands:\n");
+	print ("  start      starts echolot pingd\n");
+	print ("             signals pingd to ... \n");
+	print ("  stop               ... shutdown\n");
+	print ("  process            ... reopen outfile and process commands\n");
+	print ("  add                ... add a remailer address\n");
+	print ("  delete             ... delete a remailer address\n");
+	print ("  disable            ... disable a remailer\n");
+	print ("  enable             ... enable a remailer\n");
+	print ("  set                ... set remailer options\n");
+	print ("  setremailercaps    ... set remailer capabilities manually\n");
+	print ("  deleteremailercaps ... delete remailer capabilities manually\n");
+	print ("  getkeyconf         ... request remailer-xxx data immediatly\n");
+	print ("  sendpings          ... request immediate sending of pings\n");
+	print ("  sendchainpings     ... request immediate sending of chainpings\n");
+	print ("  buildstats         ... build remailer stats immediatly\n");
+	print ("  buildkeys          ... buid keyrings immediatly\n");
+	print ("  buildthesaurus     ... build thesaurus immediatly\n");
+	print ("  buildfromlines     ... build fromlines immediatly\n");
+	print ("  summary            ... print status summary to log\n");
+	print ("  dumpconf           ... dump configuration\n");
+    exit 0;
+};
+if ($params->{'version'}) {
+    print ("echolot $VERSION\n");
+    print ("(c) 2002, 2003, 2004 Peter Palfrader <peter\@palfrader.org>\n");
+    print ("http://alioth.debian.org/projects/echolot/\n");
+    exit 0;
+};
+$params->{'quiet'} = undef if ($params->{'verbose'});
+
+my $COMMAND = shift @ARGV;
+die ("command required\n") unless defined $COMMAND;
+
+
+Echolot::Config::init( $params );
+chdir( Echolot::Config::get()->{'homedir'} );
+Echolot::Globals::init( version => $VERSION);
+
+
+if ($COMMAND eq 'add' || $COMMAND eq 'delete') {
+	command_adddelete($COMMAND, @ARGV);
+	hup_if_wanted($params->{'nohup'});
+} elsif ($COMMAND eq 'set') {
+	command_set(@ARGV);
+	hup_if_wanted($params->{'nohup'});
+} elsif ($COMMAND eq 'enable' || $COMMAND eq 'disable') {
+	command_enabledisable($COMMAND, @ARGV);
+	hup_if_wanted($params->{'nohup'});
+} elsif ($COMMAND eq 'deleteremailercaps') {
+	command_deleteremailercaps(@ARGV);
+	hup_if_wanted($params->{'nohup'});
+} elsif ($COMMAND eq 'setremailercaps') {
+	command_setremailercaps(@ARGV);
+	hup_if_wanted($params->{'nohup'});
+} elsif ($COMMAND eq 'getkeyconf') {
+	command_getkeyconf(@ARGV);
+	hup_if_wanted($params->{'nohup'});
+} elsif ($COMMAND eq 'sendpings') {
+	command_sendpings(@ARGV);
+	hup_if_wanted($params->{'nohup'});
+} elsif ($COMMAND eq 'sendchainpings') {
+	command_sendchainpings(@ARGV);
+	hup_if_wanted($params->{'nohup'});
+} elsif ($COMMAND eq 'buildstats') {
+	Echolot::Commands::addCommand("buildstats");
+	hup_if_wanted($params->{'nohup'});
+} elsif ($COMMAND eq 'buildkeys') {
+	Echolot::Commands::addCommand("buildkeys");
+	hup_if_wanted($params->{'nohup'});
+} elsif ($COMMAND eq 'buildthesaurus') {
+	Echolot::Commands::addCommand("buildthesaurus");
+	hup_if_wanted($params->{'nohup'});
+} elsif ($COMMAND eq 'buildfromlines') {
+	Echolot::Commands::addCommand("buildfromlines");
+	hup_if_wanted($params->{'nohup'});
+} elsif ($COMMAND eq 'summary') {
+	Echolot::Commands::addCommand("summary");
+	hup_if_wanted($params->{'nohup'});
+} elsif ($COMMAND eq 'process') {
+	daemon_hup();
+} elsif ($COMMAND eq 'stop') {
+	daemon_stop();
+} elsif ($COMMAND eq 'start') {
+	# FIXME: remove stale pid files
+	die ("Pidfile '".Echolot::Config::get()->{'pidfile'}."' exists\n")
+		if pid_exists(1);
+	Echolot::Log::init();
+	make_dirs();
+	Echolot::Config::check_binaries();
+	if ($params->{'detach'}) {
+		print "Detaching.\n" unless ($params->{'quiet'});
+		Echolot::Log::debug("Detaching.");
+		exit(0) if (fork());
+		POSIX::setsid();
+		exit(0) if (fork());
+		my $logfile = Echolot::Config::get()->{'logfile'};
+		open (STDOUT, ">>$logfile") or die ("Cannot open '$logfile' as STDOUT\n");
+		open (STDERR, ">&STDOUT") or die ("Cannot dup STDOUT as STDERR\n");
+		open (STDIN , "</dev/null") or die ("Cannot open /dev/null as STDIN\n");
+		$redirected_stdio = 1;
+		Echolot::Log::info "Starting up.";
+		daemon_run( $params->{'process'} );
+		Echolot::Log::info "Shutdown complete.";
+	} else {
+		daemon_run( $params->{'process'} );
+	};
+} elsif ($COMMAND eq 'dumpconf') {
+	Echolot::Config::dump();
+} elsif ($COMMAND eq 'convert') {
+	Echolot::Globals::initStorage();
+	setSigHandlers();
+
+	Echolot::Globals::get()->{'storage'}->convert();
+
+	Echolot::Globals::get()->{'storage'}->commit();
+	Echolot::Globals::get()->{'storage'}->finish();
+} else {
+	die ("Command $COMMAND unknown");
+};
+
+exit 0;
+
+# vim: set ts=4 shiftwidth=4:

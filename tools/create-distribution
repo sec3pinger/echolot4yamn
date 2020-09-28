@@ -1,0 +1,45 @@
+#!/bin/sh
+#
+#
+# This file is part of Echolot - a Pinger for anonymous remailers.
+#
+# Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2012, 2014 Peter Palfrader <peter@palfrader.org>
+#
+# This program is free software. you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+#
+
+# This script is used after exporting the CVS to build a new
+# release tarball
+
+set -e
+
+version=`grep 'VERSION =' pingd | sed -e "s/.* '//" -e "s/'.*//"`
+
+dirname="echolot-$version"
+tagname="echolot-$version"
+
+if ! git show "$tagname" -- > /dev/null; then
+  echo >&2 "Seems this release is not tagged yet."
+  exit 1
+fi
+
+mkdir "$dirname"
+git archive "$tagname" | (cd "$dirname" && tar xvf -)
+
+(cd "$dirname" && pod2man --section=1 --release="$version" --center=Echolot pingd doc/pingd.1 )
+(cd "$dirname" && pod2man --section=5 --release="$version" --center=Echolot doc/pingd.conf.pod doc/pingd.conf.5 )
+
+tar czf "$dirname.tar.gz" "$dirname"
+echo "Maybe run gpg --detach-sign $dirname.tar.gz"

@@ -1,0 +1,34 @@
+
+Legend:
+        - Not done
+        * Top priority
+        . Partially done
+        o Done
+        D Deferred
+        X Abandoned
+
+ - updated information with from lines
+ - don't send that many messages with From Headers
+ - optionally log messages wich raise problems
+ - close and open files instead of keeping all the files open
+ - make 'not a remailer' check not that strict
+
+can be done later:
+ - allow capsstring overrides/additions
+ - check gnupg version number on startup
+ - chain preload and postload
+ D have a way to always have certain keys in the keyring
+   (manually add nym's keyrings)
+   This is not necessary if we add real nymserv pinging
+ D rotate secret
+ D parse bounces and mark pings as dead immediatly
+ D separate keys in remailer-key reply if they share the same armor (cmeclex is
+   the only one doing this. AARG)
+ D query other stat pages for new remailers
+ D ping nymservers
+ D ping mail2news gates
+ D ping remailer -> usenet, summarize from lines
+ X have different stats philosophies (pessimist, optimist..)
+ X get rid of dependency on mix
+ X get rid of dependency on gnupg
+ X have a timeout on GPG calls (nonblocking IO should solve the problem)

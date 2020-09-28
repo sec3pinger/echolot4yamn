@@ -1,0 +1,71 @@
+#
+# This file is part of Echolot - a Pinger for anonymous remailers.
+#
+# Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2012, 2014 Peter Palfrader <peter@palfrader.org>
+#
+# This program is free software. you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+
+
+# see man pingd.conf(5) for a list of all available configuration options.
+# There are a lot more than those listed in this sample.
+
+$CONFIG = {
+  # A short name for your site/pinger. Is used in the statistics produced.
+ 	'sitename'         => 'unconfigured',
+
+  # The local part of the pinger's email address
+  # In "pinger@remailer.example.com" the localpart is "pinger".
+	'my_localpart'     => 'pinger',
+
+  # The domain part (FQDN) of the pinger's email address.
+  # In "pinger@remailer.example.com" the domain part is "remailer.example.com".
+	'my_domain'        => 'remailer.example.com',
+
+  # The email address of the human operator that runs this pinger.
+	'operator_address' => 'remop@example.org',
+
+  # Name of the mixmaster executable. If it is not in your PATH make
+  # sure to include path information.
+	#'mixmaster'        => '/home/pinger/Mix/mix',
+
+  # The recipient_delimiter parameter specifies the separator between user names
+  # and address extensions (user+foo).
+  #
+  # If it is an empty string Echolot does not make use of user defined mailboxes
+  # but rather encodes the message type et al in a Comment/Realname part of an
+  # address.
+  #
+  # The use of recipient_delimiter is strongly recommended if your MTA setup
+  # supports it.
+	'recipient_delimiter'    => '+',
+	#'recipient_delimiter'    => '',
+
+  # Also build separate rlists with data from only DSA pings, only RSA
+  # pings and only unencrypted pings.
+	'separate_rlists'  => 0,
+
+  # Build a combined list of all different stats too. While this is no
+  # standard format it is nice to read for a human eye.
+	'combined_list'    => 0,
+
+  # Log file and level (valid levels are debug, info, notice, warning, error,
+  # critical, alert, emergency)
+	#'logfile'         => 'pingd.log',
+	#'loglevel'        => 'info',
+
+          };
+1;
+
+# vim:set syntax=perl:

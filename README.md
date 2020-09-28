@@ -15,3 +15,6 @@ Furthermore, Echolot collects configuration parameters and keys of
 remailers and offers the collected information in a format readable by
 remailer clients. This helps reduce the administration effort required
 to use or host remailers.
+
+Visit <https://www.sec3.net/yamnhelp/install_yamn_pinger.html> for a
+step-by-step guide on how to set up an Echolot YAMN pinger service.

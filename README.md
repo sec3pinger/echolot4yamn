@@ -1,9 +1,11 @@
 # echolot4yamn
 Echolot For YAMN Remailers
 
-Echolot was written by Peter Palfrader. It was originally a pinger
-software for Mixmaster and Cpunk remailers. In this repo it has
-been hacked to make it work with the new YAMN anonymous remailers.
+Echolot was written by Peter Palfrader. In its original form it
+was a pinger program for Mixmaster and Cpunk remailers.
+
+In this repo it has been hacked to make it work with the new YAMN
+anonymous remailers.
 
 A Pinger in the context of anonymous remailers is a program that
 regularly sends messages through remailers to determine their status.
@@ -16,5 +18,5 @@ remailers and offers the collected information in a format readable by
 remailer clients. This helps reduce the administration effort required
 to use or host remailers.
 
-Visit <https://www.sec3.net/yamnhelp/install_yamn_pinger.html> for a
-step-by-step guide on how to set up an Echolot YAMN pinger service.
+Visit <https://sac001.github.io/yamnhelp/install_yamn_pinger.html> for
+a step-by-step guide on how to set up an Echolot YAMN pinger service.
